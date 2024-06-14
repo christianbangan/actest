@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using GeneratorAPI.Models.Request;
+using GeneratorAPI.Repositories.Interfaces;
 using GeneratorAPI.Services.Interfaces;
 
 namespace GeneratorAPI.Repositories
@@ -27,18 +28,26 @@ namespace GeneratorAPI.Repositories
 
         public async Task<IResult> GenerateYoutubeTitle(RequestModel body)
         {
-            var reqParam = await ValidateRequestParameters(body);
-
-            if (!string.IsNullOrEmpty(reqParam))
-                return Results.BadRequest(reqParam);
-            else
+            try
             {
-                var response = await _requestData.GenerateYoutubeTitle(body);
+                var reqParam = await ValidateRequestParameters(body);
 
-                if (response is string)
-                    return Results.BadRequest(response);
+                if (!string.IsNullOrEmpty(reqParam))
+                    return Results.BadRequest(reqParam);
                 else
-                    return Results.Ok(response);
+                {
+                    var response = await _requestData.GenerateYoutubeTitle(body);
+
+                    if (response is string)
+                        return Results.BadRequest(response);
+                    else
+                        return Results.Ok(response);
+                }
+            }
+            catch (Exception e)
+            {
+                await _logger.Log($"Error encountered: {e.Message}");
+                return Results.Json(e.Message, options: null, contentType: null, statusCode: 500);
             }
         }
     }

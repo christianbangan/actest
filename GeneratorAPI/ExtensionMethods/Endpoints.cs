@@ -1,5 +1,5 @@
 ﻿using GeneratorAPI.Models.Request;
-using GeneratorAPI.Repositories;
+using GeneratorAPI.Repositories.Interfaces;
 
 namespace GeneratorAPI.ExtensionMethods
 {

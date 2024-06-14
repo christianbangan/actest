@@ -4,6 +4,7 @@ using GeneratorAPI.Repositories;
 using FluentValidation;
 using GeneratorAPI.Models.Request;
 using GeneratorAPI.Models.Request.Validators;
+using GeneratorAPI.Repositories.Interfaces;
 
 namespace GeneratorAPI.ExtensionMethods
 {

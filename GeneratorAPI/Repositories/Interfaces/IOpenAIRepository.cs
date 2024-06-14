@@ -1,6 +1,6 @@
 ﻿using GeneratorAPI.Models.Request;
 
-namespace GeneratorAPI.Repositories
+namespace GeneratorAPI.Repositories.Interfaces
 {
     public interface IOpenAIRepository
     {
