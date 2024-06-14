@@ -1,20 +1,45 @@
-﻿using GeneratorAPI.Models.Request;
+﻿using FluentValidation;
+using GeneratorAPI.Models.Request;
 using GeneratorAPI.Services.Interfaces;
 
 namespace GeneratorAPI.Repositories
 {
-    public class OpenAIRepository(IRequestDataService requestData) : IOpenAIRepository
+    public class OpenAIRepository(IRequestDataService requestData, IValidator<RequestModel> validator, ILoggerService logger) : IOpenAIRepository
     {
         private readonly IRequestDataService _requestData = requestData;
+        private readonly IValidator<RequestModel> _validator = validator;
+        private readonly ILoggerService _logger = logger;
+
+        private async Task<string> ValidateRequestParameters(RequestModel body)
+        {
+            string errorMessage = string.Empty;
+
+            var validate = await _validator.ValidateAsync(body);
+
+            if (!validate.IsValid)
+            {
+                errorMessage = validate.Errors[0].ErrorMessage;
+                await _logger.Log($"Error encountered (parameter error): {errorMessage}");
+            }
+
+            return errorMessage;
+        }
 
         public async Task<IResult> GenerateYoutubeTitle(RequestModel body)
         {
-            var response = await _requestData.GenerateYoutubeTitle(body);
+            var reqParam = await ValidateRequestParameters(body);
 
-            if (response is string)
-                return Results.BadRequest(response);
+            if (!string.IsNullOrEmpty(reqParam))
+                return Results.BadRequest(reqParam);
             else
-                return Results.Ok(response);
+            {
+                var response = await _requestData.GenerateYoutubeTitle(body);
+
+                if (response is string)
+                    return Results.BadRequest(response);
+                else
+                    return Results.Ok(response);
+            }
         }
     }
 }

@@ -22,10 +22,4 @@ namespace GeneratorAPI.Models.Request
         [JsonProperty("max_tokens")]
         public int MaxTokens { get; set; }
     }
-
-    public class RequestModel : GenerateYoutubeTitleRequestModel
-    {
-        public string? ContentType { get; set; }
-        public string? Keywords { get; set; }
-    }
 }
