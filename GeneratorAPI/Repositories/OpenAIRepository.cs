@@ -12,13 +12,9 @@ namespace GeneratorAPI.Repositories
             var response = await _requestData.GenerateYoutubeTitle(body);
 
             if (response is string)
-            {
                 return Results.BadRequest(response);
-            }
             else
-            {
                 return Results.Ok(response);
-            }
         }
     }
 }
