@@ -6,7 +6,7 @@ namespace GeneratorAPI.Models.Request.Validators
     {
         public RequestModelValidator()
         {
-            RuleFor(x => x.Keywords).NotNull().WithMessage("");
+            RuleFor(x => x.Keywords).NotNull();
             RuleFor(x => x.ContentType).NotNull();
         }
     }
