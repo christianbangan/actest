@@ -3,7 +3,6 @@ using GeneratorAPI.Models.Request;
 using GeneratorAPI.Models.Response;
 using GeneratorAPI.Repositories.Interfaces;
 using GeneratorAPI.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using System.Net;
 
 namespace GeneratorAPI.Repositories
