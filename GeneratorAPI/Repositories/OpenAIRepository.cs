@@ -1,7 +1,10 @@
 ﻿using FluentValidation;
 using GeneratorAPI.Models.Request;
+using GeneratorAPI.Models.Response;
 using GeneratorAPI.Repositories.Interfaces;
 using GeneratorAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using System.Net;
 
 namespace GeneratorAPI.Repositories
 {
@@ -28,26 +31,40 @@ namespace GeneratorAPI.Repositories
 
         public async Task<IResult> GenerateYoutubeTitle(RequestModel body)
         {
+            var response = new ResponseModel { StatusCode = (int)HttpStatusCode.BadRequest };
+
             try
             {
                 var reqParam = await ValidateRequestParameters(body);
 
                 if (!string.IsNullOrEmpty(reqParam))
-                    return Results.BadRequest(reqParam);
+                {
+                    response.Message = reqParam;
+                    return Results.BadRequest(response);
+                }
                 else
                 {
-                    var response = await _requestData.GenerateYoutubeTitle(body);
+                    var result = await _requestData.GenerateYoutubeTitle(body);
 
-                    if (response is string)
+                    if (result is string res)
+                    {
+                        response.Message = res;
                         return Results.BadRequest(response);
+                    }
                     else
+                    {
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                        response.Message = result;
                         return Results.Ok(response);
+                    }
                 }
             }
             catch (Exception e)
             {
                 await _logger.Log($"Error encountered: {e.Message}");
-                return Results.Json(e.Message, options: null, contentType: null, statusCode: 500);
+                response.Message = e.Message;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                return Results.Json(response, options: null, contentType: null, statusCode: 500);
             }
         }
     }
