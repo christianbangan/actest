@@ -13,7 +13,8 @@ namespace GeneratorAPI.ExtensionMethods
         public static void Inject(this WebApplicationBuilder builder)
         {
             builder.Services.AddScoped<ILoggerService, LoggerService>();
-            builder.Services.AddScoped<IValidator<RequestModel>, RequestModelValidator>();
+            builder.Services.AddScoped<IValidator<GenerateYoutubeTitleRequestModel>, GenerateYoutubeTitleRequestModelValidator>();
+            builder.Services.AddScoped<IValidator<YoutubeChannelFinderRequestModel>, YoutubeChannelFinderRequestModelValidator>();
             builder.Services.AddScoped<IHttpClientWrapperService, HttpClientWrapperService>();
             builder.Services.AddScoped<IRequestDataService, RequestDataService>();
             builder.Services.AddScoped<IOpenAIRepository, OpenAIRepository>();

@@ -7,17 +7,23 @@ using System.Net;
 
 namespace GeneratorAPI.Repositories
 {
-    public class OpenAIRepository(IRequestDataService requestData, IValidator<RequestModel> validator, ILoggerService logger) : IOpenAIRepository
+    public class OpenAIRepository(IRequestDataService requestData, IValidator<GenerateYoutubeTitleRequestModel> generateYoutubeTitleValidator, IValidator<YoutubeChannelFinderRequestModel> youtubeChannelFinderRequestValidadtor, ILoggerService logger) : IOpenAIRepository
     {
         private readonly IRequestDataService _requestData = requestData;
-        private readonly IValidator<RequestModel> _validator = validator;
+        private readonly IValidator<GenerateYoutubeTitleRequestModel> _generateYoutubeTitleValidator = generateYoutubeTitleValidator;
+        private readonly IValidator<YoutubeChannelFinderRequestModel> _youtubeChannelFinderRequestValidadtor = youtubeChannelFinderRequestValidadtor;
         private readonly ILoggerService _logger = logger;
 
-        private async Task<string> ValidateRequestParameters(RequestModel body)
+        private async Task<string> ValidateRequestParameters(object body)
         {
             string errorMessage = string.Empty;
 
-            var validate = await _validator.ValidateAsync(body);
+            FluentValidation.Results.ValidationResult validate = new();
+
+            if (body is GenerateYoutubeTitleRequestModel title)
+                validate = await _generateYoutubeTitleValidator.ValidateAsync(title);
+            else if (body is YoutubeChannelFinderRequestModel channel)
+                validate = await _youtubeChannelFinderRequestValidadtor.ValidateAsync(channel);
 
             if (!validate.IsValid)
             {
@@ -28,9 +34,9 @@ namespace GeneratorAPI.Repositories
             return errorMessage;
         }
 
-        public async Task<IResult> GenerateYoutubeTitle(RequestModel body)
+        public async Task<IResult> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body)
         {
-            var response = new ResponseModel { StatusCode = (int)HttpStatusCode.BadRequest };
+            var response = new GenerateYoutubeTitleResponseModel { StatusCode = (int)HttpStatusCode.BadRequest };
 
             try
             {
@@ -63,6 +69,44 @@ namespace GeneratorAPI.Repositories
                 await _logger.Log($"Error encountered: {e.Message}");
                 response.Message = e.Message;
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                return Results.Json(response, options: null, contentType: null, statusCode: 500);
+            }
+        }
+
+        public async Task<IResult> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body)
+        {
+            try
+            {
+                var reqParam = await ValidateRequestParameters(body);
+
+                if (!string.IsNullOrEmpty(reqParam))
+                {
+                    var result = new YoutubeChannelFinderFailedResponseModel
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Error = reqParam
+                    };
+
+                    return Results.BadRequest(result);
+                }
+
+                var response = await _requestData.YoutubeChannelFinder(body);
+
+                if (response is YoutubeChannelFinderFailedResponseModel)
+                    return Results.BadRequest(response);
+
+                return Results.Ok(response);
+            }
+            catch (Exception e)
+            {
+                YoutubeChannelFinderFailedResponseModel response = new()
+                {
+                    StatusCode = 500,
+                    Error = e.Message
+                };
+
+                await _logger.Log($"Error encountered: {e.Message}");
+
                 return Results.Json(response, options: null, contentType: null, statusCode: 500);
             }
         }

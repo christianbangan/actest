@@ -5,6 +5,8 @@ namespace GeneratorAPI.Services.Interfaces
 {
     public interface IRequestDataService
     {
-        Task<object> GenerateYoutubeTitle(RequestModel body);
+        Task<object> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body);
+
+        Task<object> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body);
     }
 }

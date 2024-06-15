@@ -4,6 +4,8 @@ namespace GeneratorAPI.Repositories.Interfaces
 {
     public interface IOpenAIRepository
     {
-        Task<IResult> GenerateYoutubeTitle(RequestModel body);
+        Task<IResult> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body);
+
+        Task<IResult> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body);
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace GeneratorAPI.Models.Response
 {
-    public class ResponseModel
+    public class YoutubeChannelFinderFailedResponseModel
     {
         public int StatusCode { get; set; }
-        public object? Message { get; set; }
+        public string? Error { get; set; }
     }
 }

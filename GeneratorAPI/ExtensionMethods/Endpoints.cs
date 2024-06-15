@@ -9,17 +9,24 @@ namespace GeneratorAPI.ExtensionMethods
         {
             return methodName switch
             {
-                "GenerateYoutubeTitle" => await _repository.GenerateYoutubeTitle((RequestModel)body),
+                "GenerateYoutubeTitle" => await _repository.GenerateYoutubeTitle((GenerateYoutubeTitleRequestModel)body),
+                "YoutubeChannelFinder" => await _repository.YoutubeChannelFinder((YoutubeChannelFinderRequestModel)body),
                 _ => throw new NotImplementedException("Method not implemented."),
             };
         }
 
         public static void MapEndpoints(this WebApplication app)
         {
-            // Endpoint for Generating Youtube Title
-            app.MapPost("/api/GenerateYoutubeTitle", async (RequestModel body, IOpenAIRepository _repository) =>
+            // Endpoint for generating youtube title
+            app.MapPost("/api/GenerateYoutubeTitle", async (GenerateYoutubeTitleRequestModel body, IOpenAIRepository _repository) =>
             {
                 return await HandleRequest(body, _repository, "GenerateYoutubeTitle");
+            });
+
+            // Endpoint for finding youtube channels
+            app.MapPost("/api/YoutubeChannelFinder", async (YoutubeChannelFinderRequestModel body, IOpenAIRepository _repository) =>
+            {
+                return await HandleRequest(body, _repository, "YoutubeChannelFinder");
             });
         }
     }
