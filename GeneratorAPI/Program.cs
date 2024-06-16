@@ -22,7 +22,6 @@ builder.Inject();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
 app.UseCors("AllowAll");
 app.UseSwagger();
 app.UseSwaggerUI();
