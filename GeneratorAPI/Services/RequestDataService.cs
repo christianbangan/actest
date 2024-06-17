@@ -258,7 +258,7 @@ namespace GeneratorAPI.Services
                                 Title = video.Snippet.Title,
                                 Description = video.Snippet.Description,
                                 ChannelId = video.Snippet.ChannelId,
-                                ChannelUrl = $"https://www.youtube.com/watch?v={videoId}",
+                                VideoUrl = $"https://www.youtube.com/watch?v={videoId}",
                                 ChannelTitle = video.Snippet.ChannelTitle,
                                 PublishedAt = video.Snippet.PublishedAt ?? DateTime.MinValue,
                                 ThumbnailUrl = video.Snippet.Thumbnails.Default__.Url,

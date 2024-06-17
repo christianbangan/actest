@@ -11,7 +11,7 @@
         public string? Title { get; set; }
         public string? Description { get; set; }
         public string? ChannelId { get; set; }
-        public string? ChannelUrl { get; set; }
+        public string? VideoUrl { get; set; }
         public string? ChannelTitle { get; set; }
         public DateTime PublishedAt { get; set; }
         public string? ThumbnailUrl { get; set; }
