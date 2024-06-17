@@ -110,5 +110,43 @@ namespace GeneratorAPI.Repositories
                 return Results.Json(response, options: null, contentType: null, statusCode: 500);
             }
         }
+
+        public async Task<IResult> YoutubePopularVideos(YoutubePopularVideosRequestModel body)
+        {
+            try
+            {
+                var reqParam = await ValidateRequestParameters(body);
+
+                if (!string.IsNullOrEmpty(reqParam))
+                {
+                    var result = new YoutubeChannelFinderFailedResponseModel
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Error = reqParam
+                    };
+
+                    return Results.BadRequest(result);
+                }
+
+                var response = await _requestData.YoutubePopularVideos(body);
+
+                if (response is YoutubeChannelFinderFailedResponseModel)
+                    return Results.BadRequest(response);
+
+                return Results.Ok(response);
+            }
+            catch (Exception e)
+            {
+                YoutubeChannelFinderFailedResponseModel response = new()
+                {
+                    StatusCode = 500,
+                    Error = e.Message
+                };
+
+                await _logger.Log($"Error encountered: {e.Message}");
+
+                return Results.Json(response, options: null, contentType: null, statusCode: 500);
+            }
+        }
     }
 }

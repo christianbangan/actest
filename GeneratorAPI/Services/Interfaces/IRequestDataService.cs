@@ -8,5 +8,7 @@ namespace GeneratorAPI.Services.Interfaces
         Task<object> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body);
 
         Task<object> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body);
+
+        Task<object> YoutubePopularVideos(YoutubePopularVideosRequestModel body);
     }
 }
