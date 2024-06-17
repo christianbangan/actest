@@ -247,8 +247,8 @@ namespace GeneratorAPI.Services
                         var videoResponse = await videoRequest.ExecuteAsync();
                         var video = videoResponse.Items.FirstOrDefault();
 
-                        if (video != null && video.Statistics.LikeCount >= 200000
-                            && video.Statistics.ViewCount >= 500000)
+                        if (video != null && video.Statistics.LikeCount >= 500000
+                            && video.Statistics.ViewCount >= 800000)
                         {
 
                             // Create YoutubeChannelFinderData object with channel details
