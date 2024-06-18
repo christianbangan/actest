@@ -12,6 +12,7 @@ namespace GeneratorAPI.ExtensionMethods
                 "GenerateYoutubeTitle" => await _repository.GenerateYoutubeTitle((GenerateYoutubeTitleRequestModel)body),
                 "YoutubeChannelFinder" => await _repository.YoutubeChannelFinder((YoutubeChannelFinderRequestModel)body),
                 "YoutubePopularVideos" => await _repository.YoutubePopularVideos((YoutubePopularVideosRequestModel)body),
+                "HookGenerator" => await _repository.HookGenerator((HookGeneratorRequestModel)body),
                 _ => throw new NotImplementedException("Method not implemented."),
             };
         }
@@ -34,6 +35,12 @@ namespace GeneratorAPI.ExtensionMethods
             app.MapPost("/api/YoutubePopularVideos", async (YoutubePopularVideosRequestModel body, IOpenAIRepository _repository) =>
             {
                 return await HandleRequest(body, _repository, "YoutubePopularVideos");
+            });
+
+            // Endpoimt fpr hook generator
+            app.MapPost("/api/HookGenerator", async (HookGeneratorRequestModel body, IOpenAIRepository _repository) =>
+            {
+                return await HandleRequest(body, _repository, "HookGenerator");
             });
         }
     }

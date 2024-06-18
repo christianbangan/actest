@@ -10,5 +10,7 @@ namespace GeneratorAPI.Services.Interfaces
         Task<object> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body);
 
         Task<object> YoutubePopularVideos(YoutubePopularVideosRequestModel body);
+
+        Task<object> HookGenerator(HookGeneratorRequestModel body);
     }
 }
