@@ -11,7 +11,7 @@ namespace GeneratorAPI.ExtensionMethods
             {
                 "GenerateYoutubeTitle" => await _repository.GenerateYoutubeTitle((GenerateYoutubeTitleRequestModel)body),
                 "YoutubeChannelFinder" => await _repository.YoutubeChannelFinder((YoutubeChannelFinderRequestModel)body),
-                //"YoutubePopularVideos" => await _repository.YoutubePopularVideos((YoutubePopularVideosRequestModel)body),
+                "YoutubePopularVideos" => await _repository.YoutubePopularVideos((YoutubePopularVideosRequestModel)body),
                 "HookGenerator" => await _repository.HookGenerator((HookGeneratorRequestModel)body),
                 _ => throw new NotImplementedException("Method not implemented."),
             };
