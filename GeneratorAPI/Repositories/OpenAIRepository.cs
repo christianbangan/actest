@@ -34,7 +34,7 @@ namespace GeneratorAPI.Repositories
             return errorMessage;
         }
 
-        public async Task<IResult> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body)
+        private async Task<IResult> CallOpenAIAPI(object body)
         {
             var response = new GenerateYoutubeTitleResponseModel { StatusCode = (int)HttpStatusCode.BadRequest };
 
@@ -49,7 +49,12 @@ namespace GeneratorAPI.Repositories
                 }
                 else
                 {
-                    var result = await _requestData.GenerateYoutubeTitle(body);
+                    object? result = null;
+
+                    if (body is GenerateYoutubeTitleRequestModel generateYtTitle)
+                        result = await _requestData.GenerateYoutubeTitle(generateYtTitle);
+                    else if (body is HookGeneratorRequestModel hookApi)
+                        result = await _requestData.HookGenerator(hookApi);
 
                     if (result is string res)
                     {
@@ -70,6 +75,19 @@ namespace GeneratorAPI.Repositories
                 response.Message = e.Message;
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 return Results.Json(response, options: null, contentType: null, statusCode: 500);
+            }
+        }
+
+        public async Task<IResult> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body)
+        {
+            try
+            {
+                var response = await CallOpenAIAPI(body);
+                return response;
+            }
+            catch
+            {
+                throw;
             }
         }
 
@@ -146,6 +164,19 @@ namespace GeneratorAPI.Repositories
                 await _logger.Log($"Error encountered: {e.Message}");
 
                 return Results.Json(response, options: null, contentType: null, statusCode: 500);
+            }
+        }
+
+        public async Task<IResult> HookGenerator(HookGeneratorRequestModel body)
+        {
+            try
+            {
+                var response = await CallOpenAIAPI(body);
+                return response;
+            }
+            catch
+            {
+                throw;
             }
         }
     }

@@ -4,17 +4,11 @@ using GeneratorAPI.Models.Response;
 using GeneratorAPI.Services.Interfaces;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
-using Google.Apis.YouTube.v3.Data;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Newtonsoft.Json;
-using System.CodeDom;
+using System.Data;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Globalization;
-using static System.Net.WebRequestMethods;
 
 namespace GeneratorAPI.Services
 {
@@ -68,26 +62,46 @@ namespace GeneratorAPI.Services
         [GeneratedRegex(@"^\d+\.\s*")]
         private static partial Regex ResponseSeparator();
 
-        public async Task<object> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body)
+        private async Task<object> CallOpenAIAPI(object body, string config)
         {
             try
             {
-                var headers = new List<HeadersModel> { new() { HeaderName = "Authorization", HeaderValue = "Bearer " + _configuration["GenerateYoutubeTitle:ApiKey"] } };
+                var headers = new List<HeadersModel> { new() { HeaderName = "Authorization", HeaderValue = "Bearer " + _configuration[$"{config}:ApiKey"] } };
+
+                Models.Request.Message message = new()
+                {
+                    Role = _configuration[$"{config}:Role"]
+                };
+
+                if (body is GenerateYoutubeTitleRequestModel ytTitleParam)
+                    message.Content = $"Creating compelling YouTube titles that are {ytTitleParam.ContentType} about {ytTitleParam.Keywords} that draws viewers' attention and encourages them to click and watch your video.";
+                else if (body is HookGeneratorRequestModel hookParam)
+                    message.Content = $"If my idea is about {hookParam.Idea} and the content-type is {hookParam.ContentType}, Generate the following 1. Intriguing Question, 2. Visual Imagery 3. Quotation. Make it look like crafted with the precision of a seasoned digital marketer, this hook is designed to captivate attention across all types of content. Make it as  json response with property names: intriguing_question, visual_imagery, quotation.";
+
                 var payload = new GenerateYoutubeTitleApiRequestModel
                 {
-                    Model = _configuration["GenerateYoutubeTitle:Model"],
+                    Model = _configuration[$"{config}:Model"],
                     Messages =
                     [
-                        new Models.Request.Message
-                        {
-                            Role = _configuration["GenerateYoutubeTitle:Role"],
-                            Content = $"Creating compelling YouTube titles that are {body.ContentType} about {body.Keywords} that draws viewers' attention and encourages them to click and watch your video."
-                        }
+                        message
                     ],
                     MaxTokens = int.Parse(_configuration["GenerateYoutubeTitle:MaxTokens"]!)
                 };
 
                 var result = await RequestDataOpenAI(_configuration["GenerateYoutubeTitle:URL"]!, payload, headers);
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<object> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body)
+        {
+            try
+            {
+                var result = await CallOpenAIAPI(body, "GenerateYoutubeTitle");
 
                 if (result is OpenAISuccessResponse success)
                 {
@@ -157,7 +171,6 @@ namespace GeneratorAPI.Services
                         if (channel != null && channel.Statistics.SubscriberCount >= 200000
                             && channel.Statistics.ViewCount >= 500000)
                         {
-
                             // Create YoutubeChannelFinderData object with channel details
                             var result = new YoutubeChannelFinderData
                             {
@@ -178,7 +191,6 @@ namespace GeneratorAPI.Services
 
                 // Sort channels by subscriber count (descending)
                 channels = channels.OrderByDescending(c => c.SubscriberCount).ToList();
-
 
                 var response = new YoutubeChannelFinderSuccessResponseModel()
                 {
@@ -218,12 +230,12 @@ namespace GeneratorAPI.Services
                     ApplicationName = "YoutubePopularVideo"
                 });
 
-
                 var searchRequest = youtubeService.Search.List("snippet");
                 searchRequest.Q = body.Keyword;
-                if (!String.IsNullOrEmpty(body.Region)) {
+                if (!String.IsNullOrEmpty(body.Region))
+                {
                     searchRequest.RegionCode = GetRegionCode(body.Region);
-                }               
+                }
                 searchRequest.Type = _configuration["YoutubePopularVideo:Type"];
                 searchRequest.MaxResults = int.Parse(_configuration["YoutubePopularVideo:MaxResults"]!);
 
@@ -250,7 +262,6 @@ namespace GeneratorAPI.Services
                         if (video != null && video.Statistics.LikeCount >= 500000
                             && video.Statistics.ViewCount >= 800000)
                         {
-
                             // Create YoutubeChannelFinderData object with channel details
                             var result = new YoutubePopularVideoData
                             {
@@ -275,7 +286,6 @@ namespace GeneratorAPI.Services
 
                 // Sort channels by subscriber count (descending)
                 videos = videos.OrderByDescending(c => c.LikeCount).ToList();
-
 
                 var response = new YoutubePopularVideoSuccessResponseModel()
                 {
@@ -304,6 +314,7 @@ namespace GeneratorAPI.Services
                 throw;  // Rethrow exception for further handling upstream
             }
         }
+
         private string GetRegionCode(string regionName)
         {
             try
@@ -372,7 +383,6 @@ namespace GeneratorAPI.Services
                     { "United States", "US" },
                     { "Vietnam", "VN" },
                     { "Zimbabwe", "ZW" }
-
                 };
 
                 if (regions.TryGetValue(regionName, out var code))
@@ -389,5 +399,43 @@ namespace GeneratorAPI.Services
             }
         }
 
+        public async Task<object> HookGenerator(HookGeneratorRequestModel body)
+        {
+            try
+            {
+                var result = await CallOpenAIAPI(body, "HookGenerator");
+
+                if (result is OpenAISuccessResponse success)
+                {
+                    var rawResponse = success?.Choices?.FirstOrDefault()?.Message?.Content!;
+
+                    string content = string.Empty;
+
+                    int startIndex = rawResponse.IndexOf('{');
+
+                    int endIndex = rawResponse.LastIndexOf('}');
+
+                    if (startIndex != -1 && endIndex != -1 && endIndex > startIndex)
+                    {
+                        string jsonContent = rawResponse.Substring(startIndex, endIndex - startIndex + 1);
+
+                        content = jsonContent.Trim();
+                        content = content.Replace("\n", "");
+                    }
+
+                    var response = JsonConvert.DeserializeObject<HookGeneratorApiResponseModel>(content);
+
+                    return response!;
+                }
+                else
+                {
+                    return ((OpenAIErrorResponse)result)?.Error?.Message!;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }
