@@ -85,10 +85,10 @@ namespace GeneratorAPI.Services
                     [
                         message
                     ],
-                    MaxTokens = int.Parse(_configuration["GenerateYoutubeTitle:MaxTokens"]!)
+                    MaxTokens = int.Parse(_configuration[$"{config}:MaxTokens"]!)
                 };
 
-                var result = await RequestDataOpenAI(_configuration["GenerateYoutubeTitle:URL"]!, payload, headers);
+                var result = await RequestDataOpenAI(_configuration[$"{config}:URL"]!, payload, headers);
                 return result;
             }
             catch
