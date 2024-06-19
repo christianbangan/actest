@@ -5,7 +5,7 @@ namespace GeneratorAPI.ExtensionMethods
 {
     public static class Endpoints
     {
-        private static async Task<IResult> HandleRequest(object body, IOpenAIRepository _repository, string methodName)
+        private static async Task<IResult> HandleRequest(object body, IGeneratorRepository _repository, string methodName)
         {
             return methodName switch
             {
@@ -20,25 +20,25 @@ namespace GeneratorAPI.ExtensionMethods
         public static void MapEndpoints(this WebApplication app)
         {
             // Endpoint for generating youtube title
-            app.MapPost("/api/GenerateYoutubeTitle", async (GenerateYoutubeTitleRequestModel body, IOpenAIRepository _repository) =>
+            app.MapPost("/api/GenerateYoutubeTitle", async (GenerateYoutubeTitleRequestModel body, IGeneratorRepository _repository) =>
             {
                 return await HandleRequest(body, _repository, "GenerateYoutubeTitle");
             });
 
             // Endpoint for finding youtube channels
-            app.MapPost("/api/YoutubeChannelFinder", async (YoutubeChannelFinderRequestModel body, IOpenAIRepository _repository) =>
+            app.MapPost("/api/YoutubeChannelFinder", async (YoutubeChannelFinderRequestModel body, IGeneratorRepository _repository) =>
             {
                 return await HandleRequest(body, _repository, "YoutubeChannelFinder");
             });
 
             // Endpoint for finding youtube videos
-            app.MapPost("/api/YoutubePopularVideos", async (YoutubePopularVideosRequestModel body, IOpenAIRepository _repository) =>
+            app.MapPost("/api/YoutubePopularVideos", async (YoutubePopularVideosRequestModel body, IGeneratorRepository _repository) =>
             {
                 return await HandleRequest(body, _repository, "YoutubePopularVideos");
             });
 
-            // Endpoimt fpr hook generator
-            app.MapPost("/api/HookGenerator", async (HookGeneratorRequestModel body, IOpenAIRepository _repository) =>
+            // Endpoint fpr hook generator
+            app.MapPost("/api/HookGenerator", async (HookGeneratorRequestModel body, IGeneratorRepository _repository) =>
             {
                 return await HandleRequest(body, _repository, "HookGenerator");
             });

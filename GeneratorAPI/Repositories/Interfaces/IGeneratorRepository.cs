@@ -2,7 +2,7 @@
 
 namespace GeneratorAPI.Repositories.Interfaces
 {
-    public interface IOpenAIRepository
+    public interface IGeneratorRepository
     {
         Task<IResult> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body);
 
