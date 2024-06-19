@@ -7,11 +7,12 @@ using System.Net;
 
 namespace GeneratorAPI.Repositories
 {
-    public class OpenAIRepository(IRequestDataService requestData, IValidator<GenerateYoutubeTitleRequestModel> generateYoutubeTitleValidator, IValidator<YoutubeChannelFinderRequestModel> youtubeChannelFinderRequestValidadtor, ILoggerService logger) : IOpenAIRepository
+    public class GeneratorRepository(IRequestDataService requestData, IValidator<GenerateYoutubeTitleRequestModel> generateYoutubeTitleValidator, IValidator<YoutubeChannelFinderRequestModel> youtubeChannelFinderRequestValidadtor, IValidator<HookGeneratorRequestModel> hookGeneratorValidator, ILoggerService logger) : IGeneratorRepository
     {
         private readonly IRequestDataService _requestData = requestData;
         private readonly IValidator<GenerateYoutubeTitleRequestModel> _generateYoutubeTitleValidator = generateYoutubeTitleValidator;
-        private readonly IValidator<YoutubeChannelFinderRequestModel> _youtubeChannelFinderRequestValidadtor = youtubeChannelFinderRequestValidadtor;
+        private readonly IValidator<YoutubeChannelFinderRequestModel> _youtubeChannelFinderRequestValidator = youtubeChannelFinderRequestValidadtor;
+        private readonly IValidator<HookGeneratorRequestModel> _hookGeneratorValidator = hookGeneratorValidator;
         private readonly ILoggerService _logger = logger;
 
         private async Task<string> ValidateRequestParameters(object body)
@@ -23,7 +24,9 @@ namespace GeneratorAPI.Repositories
             if (body is GenerateYoutubeTitleRequestModel title)
                 validate = await _generateYoutubeTitleValidator.ValidateAsync(title);
             else if (body is YoutubeChannelFinderRequestModel channel)
-                validate = await _youtubeChannelFinderRequestValidadtor.ValidateAsync(channel);
+                validate = await _youtubeChannelFinderRequestValidator.ValidateAsync(channel);
+            else if (body is HookGeneratorRequestModel generator)
+                validate = await _hookGeneratorValidator.ValidateAsync(generator);
 
             if (!validate.IsValid)
             {
