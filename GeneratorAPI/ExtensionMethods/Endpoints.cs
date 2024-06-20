@@ -14,6 +14,8 @@ namespace GeneratorAPI.ExtensionMethods
                 "YoutubePopularVideos" => await _repository.YoutubePopularVideos((YoutubePopularVideosRequestModel)body),
                 "HookGenerator" => await _repository.HookGenerator((HookGeneratorRequestModel)body),
                 "KeywordSearchTool" => await _repository.KeywordSearchTool((KeywordSearchToolRequestModel)body),
+                "VideoDescriptionGenerator" => await _repository.VideoDescriptionGenerator((VideoDescriptionRequestModel)body),
+                "VideoDescriptionEmailGenerator" => await _repository.VideoDescriptionEmailGenerator((VideoDescriptionEmailRequestModel)body),
                 _ => throw new NotImplementedException("Method not implemented."),
             };
         }
@@ -48,6 +50,16 @@ namespace GeneratorAPI.ExtensionMethods
             app.MapPost("/api/KeywordSearchTool", async (KeywordSearchToolRequestModel body, IGeneratorRepository _repository) =>
             {
                 return await HandleRequest(body, _repository, "KeywordSearchTool");
+            });
+
+            app.MapPost("/api/VideoDescriptionGenerator", async (VideoDescriptionRequestModel body, IGeneratorRepository _repository) =>
+            {
+                return await HandleRequest(body, _repository, "VideoDescriptionGenerator");
+            });
+
+            app.MapPost("/api/VideoDescriptionEmailGenerator", async (VideoDescriptionEmailRequestModel body, IGeneratorRepository _repository) =>
+            {
+                return await HandleRequest(body, _repository, "VideoDescriptionEmailGenerator");
             });
         }
     }

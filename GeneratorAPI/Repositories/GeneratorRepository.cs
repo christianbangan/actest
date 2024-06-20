@@ -12,6 +12,8 @@ namespace GeneratorAPI.Repositories
         IValidator<HookGeneratorRequestModel> hookGeneratorValidator,
         IValidator<YoutubePopularVideosRequestModel> youtubePopularVideosValidator,
         IValidator<KeywordSearchToolRequestModel> keywordSearchToolValidator,
+        IValidator<VideoDescriptionRequestModel> videoDescriptionModelValidator,
+        IValidator<VideoDescriptionEmailRequestModel> videoDescriptionEmailValidator,
         ILoggerService logger) : IGeneratorRepository
     {
         private readonly IRequestDataService _requestData = requestData;
@@ -20,6 +22,8 @@ namespace GeneratorAPI.Repositories
         private readonly IValidator<HookGeneratorRequestModel> _hookGeneratorValidator = hookGeneratorValidator;
         private readonly IValidator<KeywordSearchToolRequestModel> _keywordSearchToolValidator = keywordSearchToolValidator;
         private readonly IValidator<YoutubePopularVideosRequestModel> _youtubePopularVideosValidator = youtubePopularVideosValidator;
+        private readonly IValidator<VideoDescriptionRequestModel> _videoDescriptionValidator = videoDescriptionModelValidator;
+        private readonly IValidator<VideoDescriptionEmailRequestModel> _videoDescriptionEmailValidator = videoDescriptionEmailValidator;
         private readonly ILoggerService _logger = logger;
 
         private async Task<string> ValidateRequestParameters(object body)
@@ -38,6 +42,10 @@ namespace GeneratorAPI.Repositories
                 validate = await _keywordSearchToolValidator.ValidateAsync(keywordSearchTool);
             else if (body is YoutubePopularVideosRequestModel youtubePopularVideos)
                 validate = await _youtubePopularVideosValidator.ValidateAsync(youtubePopularVideos);
+            else if (body is VideoDescriptionRequestModel videoDescription)
+                validate = await _videoDescriptionValidator.ValidateAsync(videoDescription);
+            else if (body is VideoDescriptionEmailRequestModel videoEmailDescription)
+                validate = await _videoDescriptionEmailValidator.ValidateAsync(videoEmailDescription);
 
             if (!validate.IsValid)
             {
@@ -71,6 +79,10 @@ namespace GeneratorAPI.Repositories
                         result = await _requestData.HookGenerator(hookApi);
                     else if (body is KeywordSearchToolRequestModel keywordSearchTool)
                         result = await _requestData.KeywordSearchTool(keywordSearchTool);
+                    else if (body is VideoDescriptionRequestModel videoDescription)
+                        result = await _requestData.VideoDescriptionGenerator(videoDescription);
+                    else if (body is VideoDescriptionEmailRequestModel videoDescriptionEmail)
+                        result = await _requestData.VideoDescriptionEmailGenerator(videoDescriptionEmail);
 
                     if (result is string res)
                     {
@@ -81,7 +93,14 @@ namespace GeneratorAPI.Repositories
                     {
                         response.Success = true;
                         response.Message = "Success";
-                        response.Result = result;
+
+                        if (result is VideoDescriptionResponseModel videoDescription)
+                            response.Result = videoDescription.Response;
+                        else if (result is VideoDescriptionEmailResponseModel videoDescriptionEmail)
+                            response.Result = videoDescriptionEmail.Response;
+                        else
+                            response.Result = result;
+
                         return Results.Ok(response);
                     }
                 }
@@ -185,6 +204,18 @@ namespace GeneratorAPI.Repositories
         }
 
         public async Task<IResult> KeywordSearchTool(KeywordSearchToolRequestModel body)
+        {
+            var response = await CallOpenAIAPI(body);
+            return response;
+        }
+
+        public async Task<IResult> VideoDescriptionGenerator(VideoDescriptionRequestModel body)
+        {
+            var response = await CallOpenAIAPI(body);
+            return response;
+        }
+
+        public async Task<IResult> VideoDescriptionEmailGenerator(VideoDescriptionEmailRequestModel body)
         {
             var response = await CallOpenAIAPI(body);
             return response;

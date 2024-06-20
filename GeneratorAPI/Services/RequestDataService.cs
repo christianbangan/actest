@@ -4,7 +4,6 @@ using GeneratorAPI.Models.Response;
 using GeneratorAPI.Services.Interfaces;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
-using Google.Apis.YouTube.v3.Data;
 using Newtonsoft.Json;
 using System.Data;
 using System.Net;
@@ -80,6 +79,10 @@ namespace GeneratorAPI.Services
                     message.Content = OpenAICommands.GenerateHookGeneratorCommand(hookParam.Idea!, hookParam.ContentType!);
                 else if (body is KeywordSearchToolRequestModel keywordTitleParam)
                     message.Content = OpenAICommands.GenerateKeywordSearchToolCommand(keywordTitleParam.Keyword!);
+                else if (body is VideoDescriptionRequestModel videoDescriptionParam)
+                    message.Content = OpenAICommands.GenerateVideoDesriptionCommand(videoDescriptionParam);
+                else if (body is VideoDescriptionEmailRequestModel videoDescriptionEmailParam)
+                    message.Content = OpenAICommands.GenerateEmailVideoDescriptionCommand(videoDescriptionEmailParam);
 
                 var payload = new GenerateYoutubeTitleApiRequestModel
                 {
@@ -460,6 +463,48 @@ namespace GeneratorAPI.Services
         {
             var response = await GenerateCleanResponse("KeywordSearchTool", body);
             return response;
+        }
+
+        private async Task<object> VideoDescriptionAPI(object body)
+        {
+            try
+            {
+                var result = await CallOpenAIAPI(body, "VideoDescriptionGenerator");
+
+                if (result is OpenAISuccessResponse success)
+                {
+                    var rawResponse = success?.Choices?.FirstOrDefault()?.Message?.Content!;
+
+                    if (body is VideoDescriptionRequestModel)
+                        return new VideoDescriptionResponseModel { Response = rawResponse };
+                    else if (body is VideoDescriptionEmailRequestModel)
+                        return new VideoDescriptionEmailResponseModel { Response = rawResponse };
+                    else
+                        throw new NotImplementedException();
+                }
+                else
+                {
+                    return ((OpenAIErrorResponse)result)?.Error?.Message!;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<VideoDescriptionResponseModel> VideoDescriptionGenerator(VideoDescriptionRequestModel body)
+        {
+            var response = await VideoDescriptionAPI(body);
+
+            return (VideoDescriptionResponseModel)response;
+        }
+
+        public async Task<VideoDescriptionEmailResponseModel> VideoDescriptionEmailGenerator(VideoDescriptionEmailRequestModel body)
+        {
+            var response = await VideoDescriptionAPI(body);
+
+            return (VideoDescriptionEmailResponseModel)response;
         }
     }
 }
