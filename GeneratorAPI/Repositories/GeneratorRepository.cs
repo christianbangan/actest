@@ -3,16 +3,23 @@ using GeneratorAPI.Models.Request;
 using GeneratorAPI.Models.Response;
 using GeneratorAPI.Repositories.Interfaces;
 using GeneratorAPI.Services.Interfaces;
-using System.Net;
 
 namespace GeneratorAPI.Repositories
 {
-    public class GeneratorRepository(IRequestDataService requestData, IValidator<GenerateYoutubeTitleRequestModel> generateYoutubeTitleValidator, IValidator<YoutubeChannelFinderRequestModel> youtubeChannelFinderRequestValidadtor, IValidator<HookGeneratorRequestModel> hookGeneratorValidator, ILoggerService logger) : IGeneratorRepository
+    public class GeneratorRepository(IRequestDataService requestData,
+        IValidator<GenerateYoutubeTitleRequestModel> generateYoutubeTitleValidator,
+        IValidator<YoutubeChannelFinderRequestModel> youtubeChannelFinderRequestValidadtor,
+        IValidator<HookGeneratorRequestModel> hookGeneratorValidator,
+        IValidator<YoutubePopularVideosRequestModel> youtubePopularVideosValidator,
+        IValidator<KeywordSearchToolRequestModel> keywordSearchToolValidator,
+        ILoggerService logger) : IGeneratorRepository
     {
         private readonly IRequestDataService _requestData = requestData;
         private readonly IValidator<GenerateYoutubeTitleRequestModel> _generateYoutubeTitleValidator = generateYoutubeTitleValidator;
         private readonly IValidator<YoutubeChannelFinderRequestModel> _youtubeChannelFinderRequestValidator = youtubeChannelFinderRequestValidadtor;
         private readonly IValidator<HookGeneratorRequestModel> _hookGeneratorValidator = hookGeneratorValidator;
+        private readonly IValidator<KeywordSearchToolRequestModel> _keywordSearchToolValidator = keywordSearchToolValidator;
+        private readonly IValidator<YoutubePopularVideosRequestModel> _youtubePopularVideosValidator = youtubePopularVideosValidator;
         private readonly ILoggerService _logger = logger;
 
         private async Task<string> ValidateRequestParameters(object body)
@@ -27,6 +34,10 @@ namespace GeneratorAPI.Repositories
                 validate = await _youtubeChannelFinderRequestValidator.ValidateAsync(channel);
             else if (body is HookGeneratorRequestModel generator)
                 validate = await _hookGeneratorValidator.ValidateAsync(generator);
+            else if (body is KeywordSearchToolRequestModel keywordSearchTool)
+                validate = await _keywordSearchToolValidator.ValidateAsync(keywordSearchTool);
+            else if (body is YoutubePopularVideosRequestModel youtubePopularVideos)
+                validate = await _youtubePopularVideosValidator.ValidateAsync(youtubePopularVideos);
 
             if (!validate.IsValid)
             {
@@ -39,7 +50,7 @@ namespace GeneratorAPI.Repositories
 
         private async Task<IResult> CallOpenAIAPI(object body)
         {
-            var response = new GenerateYoutubeTitleResponseModel { StatusCode = (int)HttpStatusCode.BadRequest };
+            var response = new OpenAIResponseModel { Success = false };
 
             try
             {
@@ -58,6 +69,8 @@ namespace GeneratorAPI.Repositories
                         result = await _requestData.GenerateYoutubeTitle(generateYtTitle);
                     else if (body is HookGeneratorRequestModel hookApi)
                         result = await _requestData.HookGenerator(hookApi);
+                    else if (body is KeywordSearchToolRequestModel keywordSearchTool)
+                        result = await _requestData.KeywordSearchTool(keywordSearchTool);
 
                     if (result is string res)
                     {
@@ -66,8 +79,9 @@ namespace GeneratorAPI.Repositories
                     }
                     else
                     {
-                        response.StatusCode = (int)HttpStatusCode.OK;
-                        response.Message = result;
+                        response.Success = true;
+                        response.Message = "Success";
+                        response.Result = result;
                         return Results.Ok(response);
                     }
                 }
@@ -76,22 +90,15 @@ namespace GeneratorAPI.Repositories
             {
                 await _logger.Log($"Error encountered: {e.Message}");
                 response.Message = e.Message;
-                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Success = false;
                 return Results.Json(response, options: null, contentType: null, statusCode: 500);
             }
         }
 
         public async Task<IResult> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body)
         {
-            try
-            {
-                var response = await CallOpenAIAPI(body);
-                return response;
-            }
-            catch
-            {
-                throw;
-            }
+            var response = await CallOpenAIAPI(body);
+            return response;
         }
 
         public async Task<IResult> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body)
@@ -99,31 +106,31 @@ namespace GeneratorAPI.Repositories
             try
             {
                 var reqParam = await ValidateRequestParameters(body);
+                var errorResponse = new YoutubeResponseModel
+                {
+                    Success = false,
+                };
 
                 if (!string.IsNullOrEmpty(reqParam))
                 {
-                    var result = new YoutubeChannelFinderFailedResponseModel
-                    {
-                        StatusCode = (int)HttpStatusCode.BadRequest,
-                        Error = reqParam
-                    };
+                    errorResponse.Message = reqParam;
 
-                    return Results.BadRequest(result);
+                    return Results.BadRequest(errorResponse);
                 }
 
                 var response = await _requestData.YoutubeChannelFinder(body);
 
-                if (response is YoutubeChannelFinderFailedResponseModel)
+                if (!response.Success)
                     return Results.BadRequest(response);
 
                 return Results.Ok(response);
             }
             catch (Exception e)
             {
-                YoutubeChannelFinderFailedResponseModel response = new()
+                var response = new YoutubeResponseModel
                 {
-                    StatusCode = 500,
-                    Error = e.Message
+                    Success = false,
+                    Message = e.Message
                 };
 
                 await _logger.Log($"Error encountered: {e.Message}");
@@ -138,30 +145,31 @@ namespace GeneratorAPI.Repositories
             {
                 var reqParam = await ValidateRequestParameters(body);
 
+                var errorResponse = new YoutubeResponseModel
+                {
+                    Success = false,
+                };
+
                 if (!string.IsNullOrEmpty(reqParam))
                 {
-                    var result = new YoutubeChannelFinderFailedResponseModel
-                    {
-                        StatusCode = (int)HttpStatusCode.BadRequest,
-                        Error = reqParam
-                    };
+                    errorResponse.Message = reqParam;
 
-                    return Results.BadRequest(result);
+                    return Results.BadRequest(errorResponse);
                 }
 
                 var response = await _requestData.YoutubePopularVideos(body);
 
-                if (response is YoutubeChannelFinderFailedResponseModel)
+                if (!response.Success)
                     return Results.BadRequest(response);
 
                 return Results.Ok(response);
             }
             catch (Exception e)
             {
-                YoutubeChannelFinderFailedResponseModel response = new()
+                var response = new YoutubeResponseModel
                 {
-                    StatusCode = 500,
-                    Error = e.Message
+                    Success = false,
+                    Message = e.Message
                 };
 
                 await _logger.Log($"Error encountered: {e.Message}");
@@ -172,15 +180,14 @@ namespace GeneratorAPI.Repositories
 
         public async Task<IResult> HookGenerator(HookGeneratorRequestModel body)
         {
-            try
-            {
-                var response = await CallOpenAIAPI(body);
-                return response;
-            }
-            catch
-            {
-                throw;
-            }
+            var response = await CallOpenAIAPI(body);
+            return response;
+        }
+
+        public async Task<IResult> KeywordSearchTool(KeywordSearchToolRequestModel body)
+        {
+            var response = await CallOpenAIAPI(body);
+            return response;
         }
     }
 }

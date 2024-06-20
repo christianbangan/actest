@@ -2,12 +2,6 @@
 {
     public class YoutubeChannelFinderSuccessResponseModel
     {
-        public int StatusCode { get; set; }
-        public List<YoutubeChannelFinderData>? Data { get; set; }
-    }
-
-    public class YoutubeChannelFinderData
-    {
         public string? ChannelName { get; set; }
         public string? ChannelUrl { get; set; }
         public string? ChannelThumbnail { get; set; }

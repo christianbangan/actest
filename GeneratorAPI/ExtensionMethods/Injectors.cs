@@ -16,6 +16,8 @@ namespace GeneratorAPI.ExtensionMethods
             builder.Services.AddScoped<IValidator<GenerateYoutubeTitleRequestModel>, GenerateYoutubeTitleRequestModelValidator>();
             builder.Services.AddScoped<IValidator<YoutubeChannelFinderRequestModel>, YoutubeChannelFinderRequestModelValidator>();
             builder.Services.AddScoped<IValidator<HookGeneratorRequestModel>, HookGeneratorRequestModelValidatorAbstractValidator>();
+            builder.Services.AddScoped<IValidator<KeywordSearchToolRequestModel>, KeywordSearchToolRequestModelValidator>();
+            builder.Services.AddScoped<IValidator<YoutubePopularVideosRequestModel>, YoutubePopularVideosRequestModelValidator>();
             builder.Services.AddScoped<IHttpClientWrapperService, HttpClientWrapperService>();
             builder.Services.AddScoped<IRequestDataService, RequestDataService>();
             builder.Services.AddScoped<IGeneratorRepository, GeneratorRepository>();

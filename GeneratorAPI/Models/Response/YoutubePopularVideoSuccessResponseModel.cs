@@ -2,11 +2,6 @@
 {
     public class YoutubePopularVideoSuccessResponseModel
     {
-        public int StatusCode { get; set; }
-        public List<YoutubePopularVideoData>? Data { get; set; }
-    }
-    public class YoutubePopularVideoData
-    {
         public string? VideoId { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }

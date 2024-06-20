@@ -11,5 +11,7 @@ namespace GeneratorAPI.Repositories.Interfaces
         Task<IResult> YoutubePopularVideos(YoutubePopularVideosRequestModel body);
 
         Task<IResult> HookGenerator(HookGeneratorRequestModel body);
+
+        Task<IResult> KeywordSearchTool(KeywordSearchToolRequestModel body);
     }
 }
