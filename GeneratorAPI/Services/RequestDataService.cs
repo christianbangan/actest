@@ -4,6 +4,7 @@ using GeneratorAPI.Models.Response;
 using GeneratorAPI.Services.Interfaces;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
+using Google.Apis.YouTube.v3.Data;
 using Newtonsoft.Json;
 using System.Data;
 using System.Net;
@@ -74,9 +75,11 @@ namespace GeneratorAPI.Services
                 };
 
                 if (body is GenerateYoutubeTitleRequestModel ytTitleParam)
-                    message.Content = $"Creating compelling YouTube titles that are {ytTitleParam.ContentType} about {ytTitleParam.Keywords} that draws viewers' attention and encourages them to click and watch your video.";
+                    message.Content = OpenAICommands.GenerateYoutubeTitleCommand(ytTitleParam.Keywords!, ytTitleParam.ContentType!);
                 else if (body is HookGeneratorRequestModel hookParam)
-                    message.Content = $"If my idea is about {hookParam.Idea} and the content-type is {hookParam.ContentType}, Generate the following 1. Intriguing Question, 2. Visual Imagery 3. Quotation. Make it look like crafted with the precision of a seasoned digital marketer, this hook is designed to captivate attention across all types of content. Make it as  json response with property names: intriguing_question, visual_imagery, quotation.";
+                    message.Content = OpenAICommands.GenerateHookGeneratorCommand(hookParam.Idea!, hookParam.ContentType!);
+                else if (body is KeywordSearchToolRequestModel keywordTitleParam)
+                    message.Content = OpenAICommands.GenerateKeywordSearchToolCommand(keywordTitleParam.Keyword!);
 
                 var payload = new GenerateYoutubeTitleApiRequestModel
                 {
@@ -117,6 +120,8 @@ namespace GeneratorAPI.Services
                     {
                         string cleanedLine = regex.Replace(line, "").Trim();
                         cleanedLine = cleanedLine.Trim('"');
+                        if (cleanedLine.StartsWith('-'))
+                            cleanedLine = cleanedLine.Remove(0, 1);
                         response.Add(cleanedLine);
                     }
 
@@ -133,7 +138,7 @@ namespace GeneratorAPI.Services
             }
         }
 
-        public async Task<object> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body)
+        public async Task<YoutubeResponseModel> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body)
         {
             try
             {
@@ -150,7 +155,7 @@ namespace GeneratorAPI.Services
 
                 var searchResponse = await searchRequest.ExecuteAsync();
 
-                var channels = new List<YoutubeChannelFinderData>();
+                var channels = new List<YoutubeChannelFinderSuccessResponseModel>();
 
                 // Iterate through search response items
                 foreach (var searchResult in searchResponse.Items)
@@ -171,8 +176,8 @@ namespace GeneratorAPI.Services
                         if (channel != null && channel.Statistics.SubscriberCount >= 200000
                             && channel.Statistics.ViewCount >= 500000)
                         {
-                            // Create YoutubeChannelFinderData object with channel details
-                            var result = new YoutubeChannelFinderData
+                            // Create YoutubeChannelFinderDataResponseModel object with channel details
+                            var result = new YoutubeChannelFinderSuccessResponseModel
                             {
                                 ChannelName = channel.Snippet.Title,
                                 ChannelUrl = $"https://www.youtube.com/channel/{channelId}",
@@ -192,10 +197,11 @@ namespace GeneratorAPI.Services
                 // Sort channels by subscriber count (descending)
                 channels = channels.OrderByDescending(c => c.SubscriberCount).ToList();
 
-                var response = new YoutubeChannelFinderSuccessResponseModel()
+                var response = new YoutubeResponseModel
                 {
-                    StatusCode = 200,
-                    Data = channels
+                    Success = true,
+                    Message = "Success",
+                    Result = channels
                 };
 
                 return response;
@@ -204,10 +210,10 @@ namespace GeneratorAPI.Services
             {
                 await _logger.Log($"Google API Error encountered: {e.Message}");
 
-                var response = new YoutubeChannelFinderFailedResponseModel()
+                var response = new YoutubeResponseModel
                 {
-                    StatusCode = (int)e.HttpStatusCode,
-                    Error = e.Message
+                    Success = false,
+                    Message = e.Message,
                 };
 
                 return response;
@@ -220,7 +226,7 @@ namespace GeneratorAPI.Services
             }
         }
 
-        public async Task<object> YoutubePopularVideos(YoutubePopularVideosRequestModel body)
+        public async Task<YoutubeResponseModel> YoutubePopularVideos(YoutubePopularVideosRequestModel body)
         {
             try
             {
@@ -241,7 +247,7 @@ namespace GeneratorAPI.Services
 
                 var searchResponse = await searchRequest.ExecuteAsync();
 
-                var videos = new List<YoutubePopularVideoData>();
+                var videos = new List<YoutubePopularVideoSuccessResponseModel>();
 
                 // Iterate through search response items
                 foreach (var searchResult in searchResponse.Items)
@@ -262,8 +268,8 @@ namespace GeneratorAPI.Services
                         if (video != null && video.Statistics.LikeCount >= 500000
                             && video.Statistics.ViewCount >= 800000)
                         {
-                            // Create YoutubeChannelFinderData object with channel details
-                            var result = new YoutubePopularVideoData
+                            // Create YoutubeChannelFinderDataResponseModel object with channel details
+                            var result = new YoutubePopularVideoSuccessResponseModel
                             {
                                 VideoId = videoId,
                                 Title = video.Snippet.Title,
@@ -287,10 +293,11 @@ namespace GeneratorAPI.Services
                 // Sort channels by subscriber count (descending)
                 videos = videos.OrderByDescending(c => c.LikeCount).ToList();
 
-                var response = new YoutubePopularVideoSuccessResponseModel()
+                var response = new YoutubeResponseModel
                 {
-                    StatusCode = 200,
-                    Data = videos
+                    Success = true,
+                    Message = "Success",
+                    Result = videos
                 };
 
                 return response;
@@ -299,10 +306,10 @@ namespace GeneratorAPI.Services
             {
                 await _logger.Log($"Google API Error encountered: {e.Message}");
 
-                var response = new YoutubeChannelFinderFailedResponseModel()
+                var response = new YoutubeResponseModel
                 {
-                    StatusCode = (int)e.HttpStatusCode,
-                    Error = e.Message
+                    Success = false,
+                    Message = e.Message,
                 };
 
                 return response;
@@ -399,11 +406,11 @@ namespace GeneratorAPI.Services
             }
         }
 
-        public async Task<object> HookGenerator(HookGeneratorRequestModel body)
+        private async Task<object> GenerateCleanResponse(string config, object body)
         {
             try
             {
-                var result = await CallOpenAIAPI(body, "HookGenerator");
+                var result = await CallOpenAIAPI(body, config);
 
                 if (result is OpenAISuccessResponse success)
                 {
@@ -423,7 +430,12 @@ namespace GeneratorAPI.Services
                         content = content.Replace("\n", "");
                     }
 
-                    var response = JsonConvert.DeserializeObject<HookGeneratorApiResponseModel>(content);
+                    object? response = null;
+
+                    if (config == "HookGenerator")
+                        response = JsonConvert.DeserializeObject<HookGeneratorApiResponseModel>(content);
+                    else if (config == "KeywordSearchTool")
+                        response = JsonConvert.DeserializeObject<KeywordSearchToolApiResponseModel>(content);
 
                     return response!;
                 }
@@ -436,6 +448,18 @@ namespace GeneratorAPI.Services
             {
                 throw;
             }
+        }
+
+        public async Task<object> HookGenerator(HookGeneratorRequestModel body)
+        {
+            var response = await GenerateCleanResponse("HookGenerator", body);
+            return response;
+        }
+
+        public async Task<object> KeywordSearchTool(KeywordSearchToolRequestModel body)
+        {
+            var response = await GenerateCleanResponse("KeywordSearchTool", body);
+            return response;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace GeneratorAPI.ExtensionMethods
                 "YoutubeChannelFinder" => await _repository.YoutubeChannelFinder((YoutubeChannelFinderRequestModel)body),
                 "YoutubePopularVideos" => await _repository.YoutubePopularVideos((YoutubePopularVideosRequestModel)body),
                 "HookGenerator" => await _repository.HookGenerator((HookGeneratorRequestModel)body),
+                "KeywordSearchTool" => await _repository.KeywordSearchTool((KeywordSearchToolRequestModel)body),
                 _ => throw new NotImplementedException("Method not implemented."),
             };
         }
@@ -37,10 +38,16 @@ namespace GeneratorAPI.ExtensionMethods
                 return await HandleRequest(body, _repository, "YoutubePopularVideos");
             });
 
-            // Endpoint fpr hook generator
+            // Endpoint for hook generator
             app.MapPost("/api/HookGenerator", async (HookGeneratorRequestModel body, IGeneratorRepository _repository) =>
             {
                 return await HandleRequest(body, _repository, "HookGenerator");
+            });
+
+            // Endpoint for keyword search tool
+            app.MapPost("/api/KeywordSearchTool", async (KeywordSearchToolRequestModel body, IGeneratorRepository _repository) =>
+            {
+                return await HandleRequest(body, _repository, "KeywordSearchTool");
             });
         }
     }

@@ -1,5 +1,5 @@
 ﻿using GeneratorAPI.Models.Request;
-using System.Net;
+using GeneratorAPI.Models.Response;
 
 namespace GeneratorAPI.Services.Interfaces
 {
@@ -7,10 +7,12 @@ namespace GeneratorAPI.Services.Interfaces
     {
         Task<object> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body);
 
-        Task<object> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body);
+        Task<YoutubeResponseModel> YoutubeChannelFinder(YoutubeChannelFinderRequestModel body);
 
-        Task<object> YoutubePopularVideos(YoutubePopularVideosRequestModel body);
+        Task<YoutubeResponseModel> YoutubePopularVideos(YoutubePopularVideosRequestModel body);
 
         Task<object> HookGenerator(HookGeneratorRequestModel body);
+
+        Task<object> KeywordSearchTool(KeywordSearchToolRequestModel body);
     }
 }
