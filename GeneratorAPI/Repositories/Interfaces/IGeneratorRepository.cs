@@ -13,5 +13,9 @@ namespace GeneratorAPI.Repositories.Interfaces
         Task<IResult> HookGenerator(HookGeneratorRequestModel body);
 
         Task<IResult> KeywordSearchTool(KeywordSearchToolRequestModel body);
+
+        Task<IResult> VideoDescriptionGenerator(VideoDescriptionRequestModel body);
+
+        Task<IResult> VideoDescriptionEmailGenerator(VideoDescriptionEmailRequestModel body);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace GeneratorAPI.Services
+﻿using GeneratorAPI.Models.Request;
+
+namespace GeneratorAPI.Services
 {
     public static class OpenAICommands
     {
@@ -150,6 +152,28 @@
             string command = $@"
                  If my idea is about {idea} and the content-type is {contentType}, Generate the following 1. Intriguing Question, 2. Visual Imagery 3. Quotation. Make it look like crafted with the precision of a seasoned digital marketer, this hook is designed to captivate attention across all types of content. Make it as  json response with property names: intriguing_question, visual_imagery, quotation."";
                             ";
+
+            return command;
+        }
+
+        public static string GenerateVideoDesriptionCommand(VideoDescriptionRequestModel body)
+        {
+            string command = $@"
+                    As an SEO copywriter fluent in English and specialised in writing YouTube Video Description, your task is to dispense a YouTube video description for YouTube video that is engineered to maintain viewer interest from start to finish. Your response should include the [Video Title] | [Channel Name] and in another line show your generated video description, and in another line 🎁 Get FREE Gift: [suggest one url that gives free gift where in the product is related to [keyword]].in another line  🟢 Subscribe for more:: [suggest one youtube url related to [keyword]]..then in another line generate a phrase that convince the users to join community of [Channel Name] and never miss update and to click button to subscribe.then in another line ask the user to Would you like me to write a broadcast email and a follow-up email to encourage viewers to watch this video?
+                    Keyword: {body.Keyword}
+                    Channel Name: {body.ChannelName}
+                    Blog Title: {body.BlogTitle}
+                    Blog URL: {body.BlogUrl}
+                    Video Title: {body.VideoTitle}";
+
+            return command;
+        }
+
+        public static string GenerateEmailVideoDescriptionCommand(VideoDescriptionEmailRequestModel body)
+        {
+            string command = $@"As an SEO copywriter fluent in English and specialised in writing YouTube Video Description, your task is to dispense a YouTube video description for YouTube video
+                                that is engineered to maintain viewer interest from start to finish. Your response should include a broadcast email and a follow-up email to encourage viewers
+                                to watch this video?Keyword: ""' + {body.Keyword} + ',  Channel Name: '+ {body.ChannelName} + ', Blog Title:' + {body.BlogTitle} + ',Blog URL:'  + {body.BlogUrl} + ',Video Title'+ {body.VideoTitle}";
 
             return command;
         }
