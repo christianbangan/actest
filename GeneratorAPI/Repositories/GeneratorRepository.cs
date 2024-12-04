@@ -14,7 +14,7 @@ namespace GeneratorAPI.Repositories
         IValidator<KeywordSearchToolRequestModel> keywordSearchToolValidator,
         IValidator<VideoDescriptionRequestModel> videoDescriptionModelValidator,
         IValidator<VideoDescriptionEmailRequestModel> videoDescriptionEmailValidator,
-        ILoggerService logger) : IGeneratorRepository
+        ILoggerService logger, IConfiguration config) : IGeneratorRepository
     {
         private readonly IRequestDataService _requestData = requestData;
         private readonly IValidator<GenerateYoutubeTitleRequestModel> _generateYoutubeTitleValidator = generateYoutubeTitleValidator;
@@ -25,6 +25,7 @@ namespace GeneratorAPI.Repositories
         private readonly IValidator<VideoDescriptionRequestModel> _videoDescriptionValidator = videoDescriptionModelValidator;
         private readonly IValidator<VideoDescriptionEmailRequestModel> _videoDescriptionEmailValidator = videoDescriptionEmailValidator;
         private readonly ILoggerService _logger = logger;
+        private readonly IConfiguration _config = config;
 
         private async Task<string> ValidateRequestParameters(object body)
         {
@@ -116,6 +117,8 @@ namespace GeneratorAPI.Repositories
 
         public async Task<IResult> GenerateYoutubeTitle(GenerateYoutubeTitleRequestModel body)
         {
+            var test = _config["Test"];
+            throw new Exception(test);
             var response = await CallOpenAIAPI(body);
             return response;
         }
