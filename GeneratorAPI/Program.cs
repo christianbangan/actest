@@ -18,6 +18,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Inject();
+builder.Services.AddApplicationInsightsTelemetry(new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions
+{
+    ConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
+});
 
 var app = builder.Build();
 
