@@ -6,3 +6,6 @@
 /GeneratorAPI/.vs
 /GeneratorAPI/bin/Debug/net8.0
 /GeneratorAPI/obj
+/GeneratorAPI/bin/Release/net8.0
+/GeneratorAPI/Properties
+/GeneratorAPI/GeneratorAPI.csproj.user
