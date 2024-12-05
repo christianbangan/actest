@@ -1,4 +1,5 @@
 using GeneratorAPI.ExtensionMethods;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Inject();
+builder.Services.Configure<Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration>(config =>
+{
+config.SetAzureTokenCredential(new DefaultAzureCredential());
+});
+
+builder.Services.AddApplicationInsightsTelemetry(new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions
+{
+    ConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
+});
 
 var app = builder.Build();
 

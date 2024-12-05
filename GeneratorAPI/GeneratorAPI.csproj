@@ -5,12 +5,16 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <ApplicationInsightsResourceId>/subscriptions/792d9e3c-65aa-4f2b-adf6-eb68b4cf2179/resourceGroups/acgb-azure-training-rg/providers/microsoft.insights/components/ac-test-github-insight</ApplicationInsightsResourceId>
+    <UserSecretsId>fb673d5a-01f7-4ff6-8bfb-1bab962f2dcb</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.13.0" />
     <PackageReference Include="FluentValidation" Version="11.9.2" />
     <PackageReference Include="Google.Apis.Core" Version="1.68.0" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.68.0.3421" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
